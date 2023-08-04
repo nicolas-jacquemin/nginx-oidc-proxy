@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+
+  echo:
+    image: gcr.io/google_containers/echoserver:1.8
+    ports:
+      - 8383:8080
+    networks:
+      - net
+
+  proxy:
+    build: .
+    networks:
+      - net
+    ports:
+      - ${NGINX_OIDC_PORT}:80
+    volumes:
+      - ./bootstrap.sh:/usr/local/openresty/bootstrap.sh
+    environment:
+      - OID_SESSION_CHECK_SSI=off
+      - OID_SESSION_NAME=oidc_auth
+
+      - OID_REDIRECT_PATH=/redirect_uri
+    env_file:
+      - nginx_oidc_proxy.env
+
+networks:
+  net:
